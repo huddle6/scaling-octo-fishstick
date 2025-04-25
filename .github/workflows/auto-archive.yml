@@ -107,12 +107,12 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
-      - name: VPN Setup (TradeWar)
+      - name: VPN Setup (HARVARD)
         env:
-          TradeWar_CONFIG: ${{ secrets.WIREGUARD_TRADEWAR }}
+          HARVARD_CONFIG: ${{ secrets.WIREGUARD_HARVARD }}
         run: |
           sudo mkdir -p /etc/wireguard/
-          echo "$TradeWar_CONFIG" | sudo tee /etc/wireguard/wg0.conf > /dev/null
+          echo "$HARVARD_CONFIG" | sudo tee /etc/wireguard/wg0.conf > /dev/null
           sudo chmod 600 /etc/wireguard/wg0.conf
 
           for i in {1..5}; do
