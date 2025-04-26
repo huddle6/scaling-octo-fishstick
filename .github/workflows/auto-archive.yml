@@ -46,7 +46,7 @@ jobs:
           import os
           import json
 
-          feed_url = "https://raw.githubusercontent.com/braboobssiere/holedex-song-list/main/feeds/holodex.atom"
+          feed_url = "https://raw.githubusercontent.com/braboobssiere/holedex-song-list/main/feeds/holodex-test.atom"
           response = requests.get(feed_url)
           root = ET.fromstring(response.content)
 
@@ -185,31 +185,13 @@ jobs:
           echo "### File Uploads: $LINK" >> $GITHUB_STEP_SUMMARY
           echo -e "\n$UPLOAD_LINKS" >> $GITHUB_STEP_SUMMARY
 
-      - name: Generate tag & prep commit
+      - name: Generate tag and split large files
         id: prep
         run: |
           TIMESTAMP=$(date -u +%Y%m%d-%H%M%S)
           TAG="${TIMESTAMP}"
-          BRANCH="tmp-${{ github.run_id }}"
-
-          git checkout --orphan "$BRANCH"
-          mkdir -p release-assets
-          cp -r output/* release-assets/
-          git add release-assets/
-          git commit -m "chore: add release assets"
-
-          SHA=$(git rev-parse HEAD)
-          git tag "$TAG" "$SHA"
-          git push origin "$BRANCH" --tags
-          git push origin --delete "$BRANCH" || true
-
-          echo "TAG=$TAG" >> $GITHUB_OUTPUT
-          echo "SHA=$SHA" >> $GITHUB_OUTPUT
-
-      - name: Process and split large files
-        id: process_files
-        run: |
-          cd release-assets
+          echo "TAG=$TAG" >> $GITHUB_OUTPUT          
+          cd output
           find . -type f -size +1G -exec bash -c '
             for file; do
               zip -s 1g -r "${file}.zip" "${file}"
@@ -221,11 +203,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.prep.outputs.TAG }}
-          target_commitish: ${{ steps.prep.outputs.SHA }}
           name: "Release ${{ steps.prep.outputs.TAG }}"
           draft: true
           files: |
-            release-assets/**
+            output/**
 
       - name: Cleanup tag
         run: git push --delete origin "${{ steps.prep.outputs.TAG }}" || true
