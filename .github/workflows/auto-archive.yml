@@ -23,18 +23,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Git user
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-
       - name: Set up Python
         uses: actions/setup-python@v5.5.0
         with:
           python-version: '3.11'
 
-      - name: Install parsing dependencies
-        run: pip install requests
+      - name: Set up Git user and install parsing dependencies
+        run: |
+          pip install requests
 
       - name: Parse and Validate Feed
         id: feed-parser
@@ -104,8 +100,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ffmpeg wireguard-tools jq curl zip parallel
           python3 -m pip install --upgrade pip --pre yt-dlp[default,curl-cffi]
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
       - name: VPN Setup (HARVARD)
         env:
@@ -133,7 +127,7 @@ jobs:
           URLS=$(echo '${{ needs.check-feed.outputs.urls }}' | jq -r '.[].url')
           
           parallel -j4 \
-          'cmd="yt-dlp -i --no-progress -S \"+res:480,+vcodec:av01\" \
+          'cmd="yt-dlp -i --no-progress -S \"+res:1080,+vcodec:av01\" \
             --windows-filenames --live-from-start --write-thumbnail --write-info-json \
             -o \"output/%(title).170B [%(id)s] (%(resolution)s).%(ext)s\" {}";
           echo "Download command: $cmd";
