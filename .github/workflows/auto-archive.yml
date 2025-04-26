@@ -28,7 +28,7 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Set up Git user and install parsing dependencies
+      - name: Set up parsing dependencies
         run: |
           pip install requests
 
@@ -53,7 +53,7 @@ jobs:
 
           for entry in root.findall('atom:entry', ns):
               title = entry.find('atom:title', ns).text or ''
-              if 'unarchive' not in title.lower():
+              if 'unarchive' not in title.lower() and 'アーカイブなし' not in title:
                   continue
 
               if not (summary := entry.find('atom:summary', ns).text):
