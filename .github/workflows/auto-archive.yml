@@ -42,7 +42,7 @@ jobs:
           import os
           import json
 
-          feed_url = "https://raw.githubusercontent.com/braboobssiere/holedex-song-list/main/feeds/holodex-test.atom"
+          feed_url = "https://raw.githubusercontent.com/braboobssiere/holedex-song-list/main/feeds/holodex.atom"
           response = requests.get(feed_url)
           root = ET.fromstring(response.content)
 
