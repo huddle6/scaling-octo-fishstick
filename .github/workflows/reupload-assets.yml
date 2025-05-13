@@ -20,15 +20,23 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y gh
 
+    - name: Verify GitHub CLI Installation
+      run: gh --version
+
     - name: Parse and download assets
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         # Extract tag name from URL
         RELEASE_TAG=$(echo "${{ inputs.release_url }}" | awk -F/ '{print $NF}')
+        echo "Extracted tag: $RELEASE_TAG"
         
         # Get release ID from tag
-        RELEASE_ID=$(gh api "repos/${{ github.repository }}/releases/tags/$RELEASE_TAG" --jq .id)
+        RELEASE_ID=$(gh api "repos/${{ github.repository }}/releases/tags/$RELEASE_TAG" --jq .id || echo "Error fetching release ID")
+        if [ "$RELEASE_ID" == "Error fetching release ID" ]; then
+          echo "Failed to fetch release ID"
+          exit 1
+        fi
         
         # Download all assets
         mkdir -p output
