@@ -1,0 +1,43 @@
+name: Download Release Assets
+on:
+  workflow_dispatch:
+    inputs:
+      release_url:
+        description: 'Release URL (e.g., https://github.com/owner/repo/releases/tag/...)'
+        required: true
+
+jobs:
+  download-assets:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Parse and download assets
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Extract tag name from URL
+        RELEASE_TAG=$(echo "${{ inputs.release_url }}" | awk -F/ '{print $NF}')
+        
+        # Get release ID from tag
+        RELEASE_ID=$(gh api "repos/${{ github.repository }}/releases/tags/$RELEASE_TAG" --jq .id)
+        
+        # Download all assets
+        mkdir -p output
+        gh release download $RELEASE_TAG \
+          --dir output \
+          --repo ${{ github.repository }}
+        
+        echo "Assets downloaded to output/ directory:"
+        ls -lh output/
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+          name: downloaded-videos
+          path: output/
+          compression-level: 1
+          if-no-files-found: error
