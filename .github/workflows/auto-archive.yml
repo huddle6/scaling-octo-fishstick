@@ -44,7 +44,7 @@ jobs:
                       return link['href']
               return entry.get('link', '')
 
-          feed_url = "https://raw.githubusercontent.com/braboobssiere/holedex-song-list/main/feeds/holodex-test.atom" 
+          feed_url = "https://raw.githubusercontent.com/braboobssiere/holedex-song-list/main/feeds/holodex.atom" 
           # holodex
           feed = feedparser.parse(feed_url)
 
@@ -80,8 +80,6 @@ jobs:
           with open(output_path, 'a') as f:
               f.write(f'should_process={bool(entries)}\n')
               f.write(f'urls={json.dumps(entries)}\n')
-              if not entries:
-                  exit(0)
         shell: python
 
   process-video:
@@ -149,7 +147,7 @@ jobs:
             -o \"output/%(title).170B [%(id)s] (%(resolution)s).%(ext)s\" {}";
           # remove ,+vcodec:av01 from -S until youtube fixed it
           echo "Download command: $cmd";
-          eval "$cmd"' ::: "${URLS[@]}" 2>&1 | awk '{ print strftime("[%Y-%m-%d %H:%M:%S UTC]"), $0 }' >> output/logs.txt
+          eval "$cmd"' ::: "${URLS[@]}" >> output/logs.txt 2>&1
 
       - name: VPN Cleanup
         if: ${{ always() }}
